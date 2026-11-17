@@ -2,13 +2,6 @@ import subprocess
 import sys
 
 def test_cli():
-    # Sequence of user inputs:
-    # 1 -> Topic: Operating Systems -> Level: 2 -> Save: n
-    # 2 -> Topic: DBMS -> Save: n
-    # 3 -> Topic: Python -> Length: 1 -> Save: n
-    # 4 -> Method: 2 -> Path: sample_notes.txt -> Length: 1 -> Save: n
-    # 5 -> Topic: Web Development -> Level: 1 -> Length: 1 -> Save: n
-    # 6 -> Exit
     inputs = [
         "1", "Operating Systems", "2", "n",
         "2", "DBMS", "n",

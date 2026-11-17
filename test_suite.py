@@ -13,9 +13,7 @@ def run_tests():
     passed = 0
     total = 0
 
-    # -------------------------------------------------------------
     # Test 1: Machine Learning (Intermediate Roadmap)
-    # -------------------------------------------------------------
     total += 1
     print("\n[Test 1] Testing Topic 1: Machine Learning (Intermediate Roadmap)...")
     res_ml = assistant.get_roadmap("Machine Learning", level="intermediate")
@@ -29,9 +27,7 @@ def run_tests():
     print(f"  ✅ Machine Learning Intermediate Roadmap OK ({len(res_ml['stages'])} stages returned).")
     passed += 1
 
-    # -------------------------------------------------------------
     # Test 2: Operating Systems (Resources & Summary)
-    # -------------------------------------------------------------
     total += 1
     print("\n[Test 2] Testing Topic 2: Operating Systems (Resources & Conceptual Summary)...")
     res_os = assistant.get_resources("Operating Systems")
@@ -50,9 +46,7 @@ def run_tests():
     print(f"  ✅ Operating Systems Resources OK ({res_os['total_resources']} resources) and Summary depth scaling OK.")
     passed += 1
 
-    # -------------------------------------------------------------
     # Test 3: Python (Full Study Guide + File Export)
-    # -------------------------------------------------------------
     total += 1
     print("\n[Test 3] Testing Topic 3: Python (Full Guide & File Saving)...")
     res_py = assistant.get_full_study_guide("Python", level="beginner", length="medium")
@@ -69,9 +63,7 @@ def run_tests():
     print(f"  ✅ Python Full Study Guide OK. Saved and verified at: {saved_path}")
     passed += 1
 
-    # -------------------------------------------------------------
     # Test 4: Extractive Summarizer on sample_notes.txt
-    # -------------------------------------------------------------
     total += 1
     print("\n[Test 4] Testing Extractive Summarizer on sample_notes.txt...")
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -88,9 +80,7 @@ def run_tests():
         print(f"  ✅ {length_opt.capitalize()} Note Summary OK: {s_dict['summary_sentences_count']} bullets from {s_dict['total_sentences']} sentences. Top terms: {s_dict['key_terms'][:4]}")
     passed += 1
 
-    # -------------------------------------------------------------
     # Test 5: Unknown Topic & Fuzzy Matching (difflib)
-    # -------------------------------------------------------------
     total += 1
     print("\n[Test 5] Testing Unknown Topics and Fuzzy Matching...")
     # Misspelled topic: "algos" -> should suggest "Data Structures & Algorithms"

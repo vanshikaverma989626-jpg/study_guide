@@ -1,18 +1,3 @@
-"""
-ai_client.py
-============
-Student-Friendly Google Gemini LLM Integration for Study Guide Assistant.
-
-What is an LLM (Large Language Model)?
----------------------------------------
-An LLM is a machine learning model trained on billions of sentences to understand
-and generate human-like text. In this project, we use Google Gemini
-as an intelligent tutor that can:
-  1. Generate study guides for ANY topic (even outside our offline database).
-  2. Answer student study questions and explain tough concepts with analogies.
-  3. Provide generative (abstractive) summaries of lecture notes.
-"""
-
 import json
 import os
 import re
@@ -90,15 +75,9 @@ def is_ai_available() -> bool:
 
 
 def call_gemini_api(prompt: str, temperature: float = 0.3) -> Optional[str]:
-    """
-    Sends a prompt to the Google Gemini LLM and returns the text response.
-    Tries active candidate models in order to ensure high reliability.
-    Uses standard library urllib (zero extra pip packages required).
-    """
     api_key = get_api_key()
     if not api_key:
         return None
-
     # Try each candidate model until one succeeds
     for model_name in CANDIDATE_MODELS:
         # Method 1: Try using the google-generativeai SDK if installed
@@ -157,13 +136,8 @@ def call_gemini_api(prompt: str, temperature: float = 0.3) -> Optional[str]:
 
 
 def extract_json_from_response(raw_text: str) -> Optional[Any]:
-    """
-    Helper to extract and parse JSON from the LLM's response.
-    Handles JSON objects {...} and JSON arrays [...] gracefully.
-    """
     if not raw_text:
         return None
-
     cleaned = raw_text.strip()
     match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", cleaned)
     if match:
@@ -191,15 +165,10 @@ def extract_json_from_response(raw_text: str) -> Optional[Any]:
 
 
 def find_stages_list(data: Any) -> Optional[List[Dict[str, Any]]]:
-    """
-    Robustly extracts a list of stage dictionaries anywhere inside data,
-    even if Gemini nests it under {'roadmap': {'stages': [...]}} or similar.
-    """
     if isinstance(data, list):
         if data and isinstance(data[0], dict):
             return data
         return None
-
     if isinstance(data, dict):
         # 1. Check common roadmap keys
         for key in ["stages", "roadmap", "learning_path", "curriculum", "steps", "modules", "path"]:
@@ -223,19 +192,13 @@ def find_stages_list(data: Any) -> Optional[List[Dict[str, Any]]]:
                 nested = find_stages_list(v)
                 if nested:
                     return nested
-
     return None
 
-
 def find_resources_list(data: Any) -> Optional[List[Dict[str, Any]]]:
-    """
-    Robustly extracts a list of resource dictionaries anywhere inside data.
-    """
     if isinstance(data, list):
         if data and isinstance(data[0], dict):
             return data
         return None
-
     if isinstance(data, dict):
         for key in ["resources", "learning_resources", "materials", "links", "recommendations"]:
             if key in data:
@@ -254,14 +217,9 @@ def find_resources_list(data: Any) -> Optional[List[Dict[str, Any]]]:
                 nested = find_resources_list(v)
                 if nested:
                     return nested
-
     return None
 
-
-# =============================================================================
 # LLM FEATURE 1: Ask AI Tutor (Doubt Solver & Concept Explainer)
-# =============================================================================
-
 def ask_ai_tutor(question: str) -> Optional[str]:
     prompt = f"""You are a friendly, patient computer science tutor helping an undergraduate student.
 Answer this student question clearly, simply, and engagingly.
@@ -277,11 +235,7 @@ Please format your response in clean Markdown with:
 """
     return call_gemini_api(prompt, temperature=0.4)
 
-
-# =============================================================================
 # LLM FEATURE 2: Generative Note Summarization
-# =============================================================================
-
 def generate_notes_summary_ai(notes_text: str, length: str = "medium") -> Optional[str]:
     num_points = {"short": "3 concise", "medium": "5 clear", "detailed": "7-8 thorough"}.get(length.lower(), "5 clear")
 
@@ -302,11 +256,7 @@ Output format:
 """
     return call_gemini_api(prompt, temperature=0.2)
 
-
-# =============================================================================
 # LLM FEATURE 3: Dynamic Roadmap, Resources & Summary for ANY Topic
-# =============================================================================
-
 def generate_roadmap_ai(topic: str) -> Optional[List[Dict[str, Any]]]:
     prompt = f"""You are an expert curriculum designer.
 Create a structured 6-stage learning roadmap for the topic: "{topic}".
@@ -387,5 +337,4 @@ Output ONLY valid JSON with this schema:
     raw_response = call_gemini_api(prompt, temperature=0.3)
     if not raw_response:
         return None
-
     return extract_json_from_response(raw_response)

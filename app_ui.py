@@ -1,11 +1,3 @@
-"""
-app_ui.py
-=========
-AI Lab Course Project: Study Guide & Revision Assistant
-Author: Student Submission
-Stack: Python, Streamlit, Extractive NLP, Google Gemini API
-"""
-
 import os
 import streamlit as st
 from assistant import StudyGuideAssistant
