@@ -1,0 +1,362 @@
+"""
+ai_client.py
+============
+Student-Friendly Google Gemini LLM Integration for Study Guide Assistant.
+
+What is an LLM (Large Language Model)?
+---------------------------------------
+An LLM is a machine learning model trained on billions of sentences to understand
+and generate human-like text. In this project, we use Google Gemini (gemini-1.5-flash)
+as an intelligent tutor that can:
+  1. Generate study guides for ANY topic (even outside our offline database).
+  2. Answer student study questions and explain tough concepts with analogies.
+  3. Provide generative (abstractive) summaries of lecture notes.
+
+How the Integration Works (Step-by-Step for Viva):
+--------------------------------------------------
+1. API Key Check:
+   Looks for a key in: runtime memory, GEMINI_API_KEY env variable, or api_key.txt.
+2. Prompt Engineering:
+   We craft structured instructions (prompts) telling the LLM what to do and
+   how to format its output (e.g. structured JSON or markdown bullets).
+3. API Call:
+   We send the prompt over HTTPS to Google's Gemini endpoint using Python's
+   built-in urllib (or google-generativeai SDK if installed).
+4. Graceful Fallback:
+   If there is no internet, no API key, or an API error, the program never crashes!
+   It simply falls back to the offline knowledge base with a friendly notice.
+"""
+
+import json
+import os
+import re
+import urllib.request
+import urllib.error
+from typing import Optional, Dict, Any, List
+
+# In-memory API key storage for current session
+_RUNTIME_API_KEY: Optional[str] = None
+
+# Active candidate models in order of priority (handles deprecation & capacity spikes)
+CANDIDATE_MODELS = [
+    "gemini-flash-latest",
+    "gemini-flash-lite-latest",
+    "gemini-3.8-flash",
+    "gemini-2.5-flash-lite"
+]
+
+
+def set_api_key(key: str, save_to_file: bool = True) -> bool:
+    """
+    Sets the Gemini API key for the current session.
+    Optionally saves it to api_key.txt in the project folder so it persists.
+    """
+    global _RUNTIME_API_KEY
+    clean_key = key.strip()
+    if not clean_key:
+        return False
+
+    _RUNTIME_API_KEY = clean_key
+
+    if save_to_file:
+        try:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            key_file = os.path.join(base_dir, "api_key.txt")
+            with open(key_file, "w", encoding="utf-8") as f:
+                f.write(clean_key)
+            return True
+        except Exception as e:
+            print(f"[Warning] Could not save API key to file: {e}")
+    return True
+
+
+def get_api_key() -> Optional[str]:
+    """
+    Retrieves the Gemini API key.
+    Priority order:
+      1. In-memory session key (_RUNTIME_API_KEY)
+      2. Environment variable (GEMINI_API_KEY)
+      3. api_key.txt file in project directory
+      4. .env file
+    """
+    global _RUNTIME_API_KEY
+    if _RUNTIME_API_KEY:
+        return _RUNTIME_API_KEY
+
+    # Check environment variable
+    env_key = os.getenv("GEMINI_API_KEY", "").strip()
+    if env_key:
+        return env_key
+
+    # Check api_key.txt or .env file in project directory
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    for fname in ["api_key.txt", ".env"]:
+        fpath = os.path.join(base_dir, fname)
+        if os.path.exists(fpath):
+            try:
+                with open(fpath, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line.startswith("GEMINI_API_KEY="):
+                            val = line.split("=", 1)[1].strip().strip('"').strip("'")
+                            if val:
+                                return val
+                        elif line and not line.startswith("#") and len(line) > 20:
+                            return line
+            except Exception:
+                pass
+
+    return None
+
+
+def is_ai_available() -> bool:
+    """
+    Returns True if an API key is configured and AI mode can be used.
+    """
+    return get_api_key() is not None
+
+
+def call_gemini_api(prompt: str, temperature: float = 0.3) -> Optional[str]:
+    """
+    Sends a prompt to the Google Gemini LLM and returns the text response.
+    Tries active candidate models in order to ensure high reliability.
+    Uses standard library urllib (zero extra pip packages required).
+    """
+    api_key = get_api_key()
+    if not api_key:
+        return None
+
+    # Try each candidate model until one succeeds
+    for model_name in CANDIDATE_MODELS:
+        # Method 1: Try using the google-generativeai SDK if installed
+        try:
+            import google.generativeai as genai
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel(model_name)
+            response = model.generate_content(prompt)
+            if response and response.text:
+                return response.text
+        except ImportError:
+            pass
+        except Exception:
+            pass
+
+        # Method 2: Direct REST request with standard Python urllib
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+            payload = {
+                "contents": [
+                    {
+                        "parts": [{"text": prompt}]
+                    }
+                ],
+                "generationConfig": {
+                    "temperature": temperature,
+                    "maxOutputTokens": 2048
+                }
+            }
+            data = json.dumps(payload).encode("utf-8")
+            req = urllib.request.Request(
+                url,
+                data=data,
+                headers={"Content-Type": "application/json"},
+                method="POST"
+            )
+            with urllib.request.urlopen(req, timeout=15) as response:
+                result = json.loads(response.read().decode("utf-8"))
+                candidates = result.get("candidates", [])
+                if candidates:
+                    parts = candidates[0].get("content", {}).get("parts", [])
+                    if parts:
+                        return parts[0].get("text", "")
+        except urllib.error.HTTPError as http_err:
+            # If 404 (model deprecated) or 503 (high demand), gracefully try next candidate model
+            if http_err.code in {404, 503}:
+                continue
+            elif http_err.code in {400, 403}:
+                print(f"\n[AI Error] Gemini API returned HTTP {http_err.code}. Check that your API key is valid.")
+                return None
+        except Exception:
+            continue
+
+    print("\n[AI Error] All Gemini model endpoints failed. Falling back to offline mode.")
+    return None
+
+
+def extract_json_from_response(raw_text: str) -> Optional[Dict[str, Any]]:
+    """
+    Helper to extract and parse JSON from the LLM's response,
+    safely handling markdown ```json code blocks.
+    """
+    if not raw_text:
+        return None
+
+    cleaned = raw_text.strip()
+    match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", cleaned)
+    if match:
+        cleaned = match.group(1).strip()
+
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
+        start = cleaned.find("{")
+        end = cleaned.rfind("}")
+        if start != -1 and end != -1:
+            try:
+                return json.loads(cleaned[start:end+1])
+            except Exception:
+                return None
+    return None
+
+
+# =============================================================================
+# LLM FEATURE 1: Ask AI Tutor (Doubt Solver & Concept Explainer)
+# =============================================================================
+
+def ask_ai_tutor(question: str) -> Optional[str]:
+    """
+    Sends a student question or study doubt to Gemini LLM.
+    Returns a friendly, easy-to-understand explanation with analogies.
+    """
+    prompt = f"""You are a friendly, patient computer science tutor helping an undergraduate student.
+Answer this student question clearly, simply, and engagingly.
+
+Student Question:
+"{question}"
+
+Please format your response in clean Markdown with:
+1. 💡 Simple Core Concept (explained in 2-3 plain sentences)
+2. 🚗 Real-World Analogy (to make it intuitive and memorable)
+3. 📝 Concrete Example / Code Snippet (short and beginner friendly)
+4. 🎯 Quick Exam / Viva Tip
+"""
+    return call_gemini_api(prompt, temperature=0.4)
+
+
+# =============================================================================
+# LLM FEATURE 2: Generative Note Summarization
+# =============================================================================
+
+def generate_notes_summary_ai(notes_text: str, length: str = "medium") -> Optional[str]:
+    """
+    Uses Gemini LLM to create an abstractive/generative summary of notes,
+    rephrasing and highlighting key points in clear markdown bullets.
+    """
+    num_points = {"short": "3 concise", "medium": "5 clear", "detailed": "7-8 thorough"}.get(length.lower(), "5 clear")
+
+    prompt = f"""You are an expert academic study assistant.
+Read the student notes below and generate a {num_points} bullet-point summary.
+Highlight critical technical keywords using markdown bold (e.g. **keyword**).
+
+Student Notes:
+\"\"\"
+{notes_text}
+\"\"\"
+
+Output format:
+### 🤖 AI-Generated Summary ({length.capitalize()} Length)
+- Bullet point 1
+- Bullet point 2
+...
+"""
+    return call_gemini_api(prompt, temperature=0.2)
+
+
+# =============================================================================
+# LLM FEATURE 3: Dynamic Roadmap, Resources & Summary for ANY Topic
+# =============================================================================
+
+def generate_roadmap_ai(topic: str) -> Optional[List[Dict[str, Any]]]:
+    """
+    Uses Gemini to generate a structured 6-stage roadmap for an arbitrary topic.
+    """
+    prompt = f"""You are an expert curriculum designer.
+Create a structured learning roadmap for the topic: "{topic}".
+Output ONLY valid JSON (no markdown formatting outside JSON) matching this exact schema:
+{{
+  "stages": [
+    {{
+      "stage_number": 1,
+      "level": "Beginner",
+      "title": "Stage Title",
+      "time_estimate": "1–2 weeks",
+      "subtopics": ["Subtopic 1", "Subtopic 2", "Subtopic 3"],
+      "practice_task": "A concrete mini project or practice task"
+    }}
+  ]
+}}
+Provide 6 ordered stages spanning Beginner (stages 1-2), Intermediate (stages 3-4), and Advanced (stages 5-6).
+"""
+    raw_response = call_gemini_api(prompt, temperature=0.3)
+    if not raw_response:
+        return None
+
+    data = extract_json_from_response(raw_response)
+    if data and "stages" in data and isinstance(data["stages"], list):
+        return data["stages"]
+    return None
+
+
+def generate_resources_ai(topic: str) -> Optional[List[Dict[str, Any]]]:
+    """
+    Uses Gemini to generate curated learning resources for an arbitrary topic.
+    """
+    prompt = f"""You are an educational advisor.
+Provide 5-6 high quality learning resources for the topic: "{topic}".
+Group them across these types: Free courses, YouTube channels, Books, Practice websites, Documentation.
+
+Output ONLY valid JSON matching this schema:
+{{
+  "resources": [
+    {{
+      "type": "Documentation",
+      "name": "Resource Name",
+      "reason": "One line explanation of why this resource is useful.",
+      "url": "https://official-or-wellknown-domain.com/"
+    }}
+  ]
+}}
+IMPORTANT: Do not invent URLs. Use only real official sites or leave url empty.
+"""
+    raw_response = call_gemini_api(prompt, temperature=0.3)
+    if not raw_response:
+        return None
+
+    data = extract_json_from_response(raw_response)
+    if data and "resources" in data and isinstance(data["resources"], list):
+        return data["resources"]
+    return None
+
+
+def generate_summary_ai(topic: str) -> Optional[Dict[str, Any]]:
+    """
+    Uses Gemini to generate a topic conceptual summary.
+    """
+    prompt = f"""You are an academic computer science professor.
+Provide a clear structured summary of the topic: "{topic}".
+
+Output ONLY valid JSON with this schema:
+{{
+  "definition": "Clear 1-2 sentence definition.",
+  "key_concepts": [
+    "Concept 1: Short explanation",
+    "Concept 2: Short explanation",
+    "Concept 3: Short explanation",
+    "Concept 4: Short explanation"
+  ],
+  "real_world_uses": [
+    "Real world application 1",
+    "Real world application 2",
+    "Real world application 3"
+  ],
+  "common_mistakes": [
+    "Common mistake 1 and how to avoid it",
+    "Common mistake 2 and how to avoid it"
+  ]
+}}
+"""
+    raw_response = call_gemini_api(prompt, temperature=0.3)
+    if not raw_response:
+        return None
+
+    return extract_json_from_response(raw_response)

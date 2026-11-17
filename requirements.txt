@@ -1,0 +1,11 @@
+# Study Guide Virtual Assistant - Minimal Requirements
+# Core CLI and Extractive Summarizer run on standard library alone (zero mandatory dependencies)
+
+# Optional for Gemini AI generation:
+# google-generativeai>=0.8.0
+
+# Optional for enhanced stopwords (a complete built-in list is already included):
+# nltk>=3.8.0
+
+# Optional for bonus interactive Web UI:
+streamlit>=1.30.0

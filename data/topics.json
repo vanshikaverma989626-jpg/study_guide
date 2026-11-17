@@ -1,0 +1,834 @@
+{
+  "topics": {
+    "python": {
+      "canonical_name": "Python",
+      "aliases": ["python", "py", "python3"],
+      "description": "A high-level, interpreted, general-purpose programming language known for readable syntax and versatile ecosystem.",
+      "roadmap": [
+        {
+          "stage_number": 1,
+          "level": "Beginner",
+          "title": "Python Basics & Control Flow",
+          "time_estimate": "1–2 weeks",
+          "subtopics": [
+            "Variables, primitive types (int, float, str, bool)",
+            "Arithmetic, logical, and comparison operators",
+            "Conditional statements (if-elif-else)",
+            "Loops (for, while, range, break, continue)"
+          ],
+          "practice_task": "Build a CLI Number Guessing Game and a simple interactive Calculator."
+        },
+        {
+          "stage_number": 2,
+          "level": "Beginner",
+          "title": "Core Data Structures & Functions",
+          "time_estimate": "1–2 weeks",
+          "subtopics": [
+            "Lists, tuples, sets, and dictionaries",
+            "List and dictionary comprehensions",
+            "Function definitions, arguments (*args, **kwargs), return values",
+            "Basic file handling (open, read, write with context managers)"
+          ],
+          "practice_task": "Build a Contact Book application that saves and loads contacts from a JSON file."
+        },
+        {
+          "stage_number": 3,
+          "level": "Intermediate",
+          "title": "Object-Oriented Programming (OOP)",
+          "time_estimate": "2 weeks",
+          "subtopics": [
+            "Classes, instances, attributes, and methods",
+            "Constructors (__init__) and dunder/magic methods",
+            "Inheritance, method overriding, and polymorphism",
+            "Encapsulation and custom exception handling"
+          ],
+          "practice_task": "Design a Bank Account Management system with accounts, transactions, and validation."
+        },
+        {
+          "stage_number": 4,
+          "level": "Intermediate",
+          "title": "Modules, Virtual Environments & Standard Library",
+          "time_estimate": "1–2 weeks",
+          "subtopics": [
+            "Module imports, packages, and __name__ == '__main__'",
+            "Virtual environments (venv) and pip package management",
+            "Standard libraries: os, sys, datetime, math, re (regex), json",
+            "Writing unit tests with unittest or pytest"
+          ],
+          "practice_task": "Create a Log Analyzer script that parses server logs with regex and exports error statistics."
+        },
+        {
+          "stage_number": 5,
+          "level": "Advanced",
+          "title": "Advanced Python Constructs & Concurrency",
+          "time_estimate": "2–3 weeks",
+          "subtopics": [
+            "Decorators, closures, and generator functions (yield)",
+            "Iterators and the itertools/collections modules",
+            "Context managers (contextlib)",
+            "Concurrency basics: threading, multiprocessing, and asyncio"
+          ],
+          "practice_task": "Implement an asynchronous web scraper that fetches multiple URLs concurrently with rate limiting."
+        },
+        {
+          "stage_number": 6,
+          "level": "Advanced",
+          "title": "Specialization & Production Deployment",
+          "time_estimate": "3–4 weeks",
+          "subtopics": [
+            "Domain choice: Web (FastAPI/Flask) or Data Science (NumPy/Pandas)",
+            "Code packaging (pyproject.toml, build tools)",
+            "Type hints (typing module) and static analysis with mypy",
+            "CI/CD workflows and containerization with Docker"
+          ],
+          "practice_task": "Build and containerize a REST API with FastAPI, automatic Swagger docs, and SQLite database."
+        }
+      ],
+      "resources": [
+        {
+          "type": "Documentation",
+          "name": "Official Python Documentation",
+          "reason": "The definitive, up-to-date reference for standard library functions and language specifications.",
+          "url": "https://docs.python.org/3/"
+        },
+        {
+          "type": "Free courses",
+          "name": "freeCodeCamp Python for Everybody",
+          "reason": "Gentle, comprehensive video course covering programming fundamentals up to web scraping and databases.",
+          "url": "https://www.freecodecamp.org/news/python-for-everybody/"
+        },
+        {
+          "type": "Books",
+          "name": "Automate the Boring Stuff with Python (Al Sweigart)",
+          "reason": "Practical, beginner-friendly guide showing how to automate real-world daily tasks.",
+          "url": "https://automatetheboringstuff.com/"
+        },
+        {
+          "type": "YouTube channels",
+          "name": "Corey Schafer (Python Playlist)",
+          "reason": "Clear, deep-dive tutorials on OOP, decorators, generators, and standard modules.",
+          "url": "https://www.youtube.com/@coreyms"
+        },
+        {
+          "type": "Practice websites",
+          "name": "Exercism - Python Track",
+          "reason": "Offers hands-on coding exercises with automated tests and free mentor feedback.",
+          "url": "https://exercism.org/tracks/python"
+        }
+      ],
+      "summary": {
+        "definition": "Python is an interpreted, high-level, dynamically typed language emphasizing code readability with significant indentation and clean syntax.",
+        "key_concepts": [
+          "Dynamic Typing: Variables do not require explicit type declarations; types are checked at runtime.",
+          "Batteries Included: Rich standard library providing built-in modules for networking, math, file I/O, and data serialization.",
+          "Multi-Paradigm: Supports procedural, object-oriented, and functional programming styles.",
+          "Interpreted & Bytecode Compiled: Python source files (.py) compile to bytecode (.pyc) executed by the CPython virtual machine."
+        ],
+        "real_world_uses": [
+          "Data Science & Machine Learning (Pandas, PyTorch, Scikit-learn)",
+          "Backend Web Development (FastAPI, Django, Flask)",
+          "Scripting, DevOps automation, and web scraping (Requests, BeautifulSoup)",
+          "Cybersecurity tools and penetration testing scripts"
+        ],
+        "common_mistakes": [
+          "Confusing shallow copy vs deep copy with mutable objects like lists and dictionaries.",
+          "Using mutable default arguments in functions (e.g., def append_to(item, target=[]): ...).",
+          "Improper indentation mixing tabs and spaces causing IndentationError.",
+          "Overlooking Python's Global Interpreter Lock (GIL) when attempting CPU-bound multi-threading."
+        ]
+      }
+    },
+    "machine_learning": {
+      "canonical_name": "Machine Learning",
+      "aliases": ["machine learning", "ml", "ai/ml", "machinelearning", "ai"],
+      "description": "A subset of artificial intelligence focused on building algorithms that learn patterns from data to make predictions or decisions.",
+      "roadmap": [
+        {
+          "stage_number": 1,
+          "level": "Beginner",
+          "title": "Math Foundations & Python Data Stack",
+          "time_estimate": "2–3 weeks",
+          "subtopics": [
+            "Linear algebra: Vectors, matrices, dot products, eigenvalues",
+            "Calculus: Partial derivatives, gradients, chain rule",
+            "Probability & Statistics: Distributions, mean/variance, Bayes theorem",
+            "Data manipulation with NumPy and Pandas, visualization with Matplotlib/Seaborn"
+          ],
+          "practice_task": "Perform exploratory data analysis (EDA) on the classic Iris or Titanic dataset with summary statistics and plots."
+        },
+        {
+          "stage_number": 2,
+          "level": "Beginner",
+          "title": "Supervised Learning Fundamentals",
+          "time_estimate": "2–3 weeks",
+          "subtopics": [
+            "Linear Regression & Cost Function (Mean Squared Error)",
+            "Gradient Descent optimization",
+            "Logistic Regression for binary classification",
+            "Model evaluation metrics: Accuracy, Precision, Recall, F1-Score, ROC-AUC"
+          ],
+          "practice_task": "Implement Linear Regression from scratch with NumPy and compare results with Scikit-learn on a housing price dataset."
+        },
+        {
+          "stage_number": 3,
+          "level": "Intermediate",
+          "title": "Classification, Regression & Tree Models",
+          "time_estimate": "3 weeks",
+          "subtopics": [
+            "K-Nearest Neighbors (KNN) and Support Vector Machines (SVM)",
+            "Decision Trees, Entropy, and Information Gain",
+            "Ensemble methods: Random Forests, Bagging, and Boosting (XGBoost, LightGBM)",
+            "Cross-validation, bias-variance tradeoff, and hyperparameter tuning (GridSearchCV)"
+          ],
+          "practice_task": "Train a Random Forest and XGBoost model to predict customer churn, achieving >85% F1-score."
+        },
+        {
+          "stage_number": 4,
+          "level": "Intermediate",
+          "title": "Unsupervised Learning & Feature Engineering",
+          "time_estimate": "2 weeks",
+          "subtopics": [
+            "Clustering algorithms: K-Means, Hierarchical clustering, DBSCAN",
+            "Dimensionality reduction: Principal Component Analysis (PCA) and t-SNE",
+            "Handling missing values, outlier detection, and categorical encoding (One-Hot, Target)",
+            "Feature scaling: MinMax scaling and Standardization"
+          ],
+          "practice_task": "Apply K-Means and PCA on an e-commerce customer dataset to segment users into behavioral clusters."
+        },
+        {
+          "stage_number": 5,
+          "level": "Advanced",
+          "title": "Neural Networks & Deep Learning Foundations",
+          "time_estimate": "3–4 weeks",
+          "subtopics": [
+            "Perceptrons, Multilayer Perceptrons (MLP), and activation functions (ReLU, Sigmoid, Softmax)",
+            "Backpropagation algorithm and Loss functions (Cross-Entropy)",
+            "PyTorch basics: Tensors, autograd, and building custom nn.Module models",
+            "Convolutional Neural Networks (CNNs) for image recognition"
+          ],
+          "practice_task": "Build and train a CNN in PyTorch to classify handwritten digits from the MNIST dataset with >98% accuracy."
+        },
+        {
+          "stage_number": 6,
+          "level": "Advanced",
+          "title": "Model Deployment & MLOps Basics",
+          "time_estimate": "2–3 weeks",
+          "subtopics": [
+            "Model serialization (joblib, ONNX)",
+            "Serving model inference endpoints via FastAPI",
+            "Data drift, model monitoring, and pipeline reproducibility",
+            "Containerizing inference services with Docker"
+          ],
+          "practice_task": "Deploy a trained ML model behind a REST API in Docker that accepts JSON feature vectors and returns predictions."
+        }
+      ],
+      "resources": [
+        {
+          "type": "Free courses",
+          "name": "Coursera - Machine Learning Specialization (Andrew Ng)",
+          "reason": "The gold-standard beginner course explaining intuition, mathematical rigor, and practical ML algorithms.",
+          "url": "https://www.coursera.org/specializations/machine-learning-introduction"
+        },
+        {
+          "type": "YouTube channels",
+          "name": "StatQuest with Josh Starmer",
+          "reason": "Breaks down complex machine learning and statistical concepts into bite-sized, visual explanations.",
+          "url": "https://www.youtube.com/@statquest"
+        },
+        {
+          "type": "Books",
+          "name": "Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow (Aurélien Géron)",
+          "reason": "Practical, code-first textbook covering end-to-end ML workflows and deep learning.",
+          "url": "https://www.oreilly.com/library/view/hands-on-machine-learning/9781098125967/"
+        },
+        {
+          "type": "Documentation",
+          "name": "Scikit-Learn Official User Guide",
+          "reason": "Exceptionally well-written documentation complete with equations, guidelines, and code snippets.",
+          "url": "https://scikit-learn.org/stable/user_guide.html"
+        },
+        {
+          "type": "Practice websites",
+          "name": "Kaggle",
+          "reason": "Premier platform for datasets, community notebooks, tutorials, and competitive machine learning.",
+          "url": "https://www.kaggle.com/"
+        }
+      ],
+      "summary": {
+        "definition": "Machine Learning is an empirical branch of artificial intelligence where algorithms learn predictive patterns from historical data without being explicitly programmed with rule-based heuristics.",
+        "key_concepts": [
+          "Supervised Learning: Training algorithms on labeled input-output pairs for regression or classification.",
+          "Unsupervised Learning: Discovering hidden structures, groupings, or representations in unlabeled data (e.g. clustering).",
+          "Bias-Variance Tradeoff: Balancing underfitting (high bias, overly simplistic model) versus overfitting (high variance, memorizing noise).",
+          "Loss Function & Optimization: Mathematical metrics measuring prediction error and algorithms (like Gradient Descent) updating weights to minimize it."
+        ],
+        "real_world_uses": [
+          "Recommendation systems (Netflix, Spotify, Amazon product suggestions)",
+          "Fraud detection and financial risk assessment in banking",
+          "Medical diagnostic imaging and disease prediction",
+          "Autonomous vehicles and computer vision systems"
+        ],
+        "common_mistakes": [
+          "Data leakage: Letting test dataset information inadvertently contaminate the training or preprocessing pipeline.",
+          "Relying solely on accuracy for imbalanced datasets instead of precision, recall, and ROC-AUC.",
+          "Ignoring feature scaling when using distance-based algorithms like KNN, SVM, or Gradient Descent.",
+          "Overfitting on training data due to lack of regularization or validation split."
+        ]
+      }
+    },
+    "data_structures_algorithms": {
+      "canonical_name": "Data Structures & Algorithms",
+      "aliases": ["data structures & algorithms", "dsa", "data structures", "algorithms", "algo"],
+      "description": "The study of organizing and manipulating data efficiently to solve computational problems with optimal time and space complexity.",
+      "roadmap": [
+        {
+          "stage_number": 1,
+          "level": "Beginner",
+          "title": "Complexity Analysis & Linear Data Structures",
+          "time_estimate": "2 weeks",
+          "subtopics": [
+            "Asymptotic notation: Big-O, Big-Omega, Big-Theta, best/average/worst cases",
+            "Static arrays, dynamic arrays, and string manipulation",
+            "Singly linked lists, doubly linked lists, and circular lists",
+            "Two-pointer technique and sliding window fundamentals"
+          ],
+          "practice_task": "Implement a Singly Linked List with insertion, deletion, and reversal operations from scratch."
+        },
+        {
+          "stage_number": 2,
+          "level": "Beginner",
+          "title": "Stacks, Queues & Elementary Sorting",
+          "time_estimate": "2 weeks",
+          "subtopics": [
+            "Stack operations (LIFO) and applications (expression evaluation, monotonic stack)",
+            "Queue operations (FIFO), circular queue, deque, and priority queue basics",
+            "Elementary sorting: Bubble Sort, Selection Sort, Insertion Sort (O(n²))",
+            "Binary Search (iterative and recursive) and search space reduction"
+          ],
+          "practice_task": "Solve the Valid Parentheses and Min Stack problems, and implement Binary Search on sorted rotated arrays."
+        },
+        {
+          "stage_number": 3,
+          "level": "Intermediate",
+          "title": "Divide-and-Conquer Sorting & Hashing",
+          "time_estimate": "2 weeks",
+          "subtopics": [
+            "Merge Sort (stability, O(n log n)) and Quick Sort (partitioning, pivot choice)",
+            "Hash tables: Hash functions, collision resolution (chaining vs open addressing)",
+            "Hash maps and hash sets for O(1) average lookup",
+            "Recursion trees and Master Theorem for recurrence relations"
+          ],
+          "practice_task": "Implement a custom Hash Map with separate chaining collision handling and solve the Two Sum problem."
+        },
+        {
+          "stage_number": 4,
+          "level": "Intermediate",
+          "title": "Trees & Binary Search Trees (BST)",
+          "time_estimate": "2–3 weeks",
+          "subtopics": [
+            "Binary Tree traversals: Pre-order, In-order, Post-order (DFS), and Level-order (BFS)",
+            "Binary Search Tree properties, search, insertion, and deletion",
+            "Balanced trees concept (AVL, Red-Black Trees overview)",
+            "Heaps / Priority Queues: Min-heap, Max-heap, Heapify, and Heap Sort"
+          ],
+          "practice_task": "Implement tree level-order traversal, find the Lowest Common Ancestor, and build a Kth Largest Element finder using a Heap."
+        },
+        {
+          "stage_number": 5,
+          "level": "Advanced",
+          "title": "Graph Algorithms & Disjoint Sets",
+          "time_estimate": "3 weeks",
+          "subtopics": [
+            "Graph representations: Adjacency Matrix and Adjacency List",
+            "Breadth-First Search (BFS) for shortest path in unweighted graphs",
+            "Depth-First Search (DFS) for cycle detection and connected components",
+            "Shortest path algorithms: Dijkstra's and Bellman-Ford",
+            "Disjoint Set Union (DSU / Union-Find) and Minimum Spanning Trees (Kruskal, Prim)"
+          ],
+          "practice_task": "Solve the Number of Islands problem using DFS/BFS and implement Dijkstra's algorithm for shortest road routes."
+        },
+        {
+          "stage_number": 6,
+          "level": "Advanced",
+          "title": "Dynamic Programming & Backtracking",
+          "time_estimate": "3–4 weeks",
+          "subtopics": [
+            "Backtracking principles (N-Queens, Sudoku Solver, Permutations)",
+            "Dynamic Programming core principles: Optimal substructure & Overlapping subproblems",
+            "Top-down DP with Memoization vs Bottom-up DP with Tabulation",
+            "Classic DP patterns: 0/1 Knapsack, Longest Common Subsequence (LCS), Coin Change, Edit Distance"
+          ],
+          "practice_task": "Solve the 0/1 Knapsack problem and Longest Increasing Subsequence with both memoization and space-optimized tabulation."
+        }
+      ],
+      "resources": [
+        {
+          "type": "Documentation",
+          "name": "GeeksforGeeks DSA Portal",
+          "reason": "Massive collection of tutorials, code implementations in multiple languages, and interview questions.",
+          "url": "https://www.geeksforgeeks.org/data-structures/"
+        },
+        {
+          "type": "Practice websites",
+          "name": "LeetCode",
+          "reason": "The industry benchmark for practicing algorithmic problems categorized by pattern and difficulty.",
+          "url": "https://leetcode.com/"
+        },
+        {
+          "type": "YouTube channels",
+          "name": "NeetCode",
+          "reason": "Clear, whiteboard-style problem walkthroughs and structured DSA roadmaps (NeetCode 150).",
+          "url": "https://www.youtube.com/@NeetCode"
+        },
+        {
+          "type": "Free courses",
+          "name": "freeCodeCamp Algorithms and Data Structures",
+          "reason": "Full interactive curriculum breaking down data structures and common algorithms with hands-on labs.",
+          "url": "https://www.freecodecamp.org/learn/"
+        },
+        {
+          "type": "Books",
+          "name": "Grokking Algorithms (Aditya Bhargava)",
+          "reason": "Highly visual, delightfully illustrated introduction to core algorithms and computational thinking.",
+          "url": "https://www.manning.com/books/grokking-algorithms"
+        }
+      ],
+      "summary": {
+        "definition": "Data Structures are specialized formats for organizing, processing, and storing data, while Algorithms are step-by-step procedural instructions to solve computational problems.",
+        "key_concepts": [
+          "Time & Space Complexity: Quantifying resource consumption as input size grows using Big-O notation.",
+          "Memory Locality: Arrays provide contiguous memory and cache friendly access; linked lists provide flexible dynamic sizing with pointer overhead.",
+          "Recursion & Divide-and-Conquer: Breaking a problem down into smaller self-similar subproblems, solving them, and combining results.",
+          "Dynamic Programming: Storing results of expensive subproblems to avoid redundant recalculation."
+        ],
+        "real_world_uses": [
+          "Database indexing using B-Trees and Hash indices",
+          "GPS Navigation routing using Dijkstra and A* graph search",
+          "Search engine autocomplete and spell checkers using Trie data structures",
+          "Operating system process scheduling using Priority Queues"
+        ],
+        "common_mistakes": [
+          "Ignoring edge cases: Empty input, single element, negative numbers, or duplicate values.",
+          "Premature optimization: Selecting complex structures when a simple array or hash table suffices.",
+          "Failing to identify recurrence base cases causing infinite recursion or stack overflow.",
+          "Assuming Python list insertions at index 0 are O(1) when they actually require O(n) element shifting."
+        ]
+      }
+    },
+    "operating_systems": {
+      "canonical_name": "Operating Systems",
+      "aliases": ["operating systems", "os", "operating system"],
+      "description": "System software that manages computer hardware, software resources, and provides common services for computer programs.",
+      "roadmap": [
+        {
+          "stage_number": 1,
+          "level": "Beginner",
+          "title": "Hardware Interface & OS Architecture",
+          "time_estimate": "1–2 weeks",
+          "subtopics": [
+            "Role of the OS: Resource allocator, abstraction layer, and control program",
+            "Dual-mode operation: User mode vs Kernel mode and mode switching",
+            "System Calls: fork(), exec(), wait(), read(), write(), and trap mechanisms",
+            "Monolithic vs Microkernel vs Hybrid kernel architectures"
+          ],
+          "practice_task": "Write a C/Python script to invoke system calls and inspect process ID, parent PID, and system stats."
+        },
+        {
+          "stage_number": 2,
+          "level": "Beginner",
+          "title": "Processes, Threads & Concurrency",
+          "time_estimate": "2 weeks",
+          "subtopics": [
+            "Process Control Block (PCB) and process lifecycle states (New, Ready, Running, Waiting, Terminated)",
+            "Context switching overhead and mechanics",
+            "Threads vs Processes: User-level threads, kernel threads, and multithreading models",
+            "Inter-Process Communication (IPC): Pipes, shared memory, message queues, sockets"
+          ],
+          "practice_task": "Simulate a multi-process producer-consumer queue using shared memory or IPC pipes."
+        },
+        {
+          "stage_number": 3,
+          "level": "Intermediate",
+          "title": "CPU Scheduling Algorithms",
+          "time_estimate": "2 weeks",
+          "subtopics": [
+            "Scheduling criteria: CPU utilization, throughput, turnaround time, waiting time, response time",
+            "First-Come, First-Served (FCFS) and Shortest Job First (SJF / SRTF)",
+            "Round Robin (RR) and quantum selection tradeoffs",
+            "Priority Scheduling, Multilevel Queue, and Multilevel Feedback Queue (MLFQ)"
+          ],
+          "practice_task": "Code a CPU Scheduler simulator that takes burst times and arrival times and computes average waiting/turnaround times."
+        },
+        {
+          "stage_number": 4,
+          "level": "Intermediate",
+          "title": "Process Synchronization & Deadlocks",
+          "time_estimate": "2–3 weeks",
+          "subtopics": [
+            "Critical Section Problem and requirements: Mutual exclusion, progress, bounded waiting",
+            "Synchronization primitives: Mutex locks, Semaphores (binary & counting), and Condition Variables",
+            "Classic synchronization problems: Dining Philosophers, Readers-Writers",
+            "Deadlock conditions: Mutual exclusion, hold & wait, no preemption, circular wait",
+            "Deadlock handling: Prevention, avoidance (Banker's Algorithm), and detection/recovery"
+          ],
+          "practice_task": "Implement a deadlock-free solution to the Dining Philosophers problem using mutexes and semaphores."
+        },
+        {
+          "stage_number": 5,
+          "level": "Advanced",
+          "title": "Memory Management & Virtual Memory",
+          "time_estimate": "2–3 weeks",
+          "subtopics": [
+            "Contiguous memory allocation and fragmentation (internal vs external)",
+            "Paging architecture, Page Tables, and Translation Lookaside Buffer (TLB)",
+            "Virtual memory, demand paging, and page fault handling",
+            "Page replacement algorithms: FIFO, Optimal, LRU, Clock algorithm"
+          ],
+          "practice_task": "Implement an LRU Page Replacement simulator and track page hit and miss ratios across page reference strings."
+        },
+        {
+          "stage_number": 6,
+          "level": "Advanced",
+          "title": "File Systems, I/O & Storage Management",
+          "time_estimate": "2 weeks",
+          "subtopics": [
+            "File concepts, directory structures, inodes, and file allocation methods (contiguous, linked, indexed)",
+            "Free space management (bitmaps, linked lists)",
+            "Disk scheduling algorithms (FCFS, SSTF, SCAN, C-SCAN)",
+            "I/O hardware, interrupts, Direct Memory Access (DMA), and device drivers"
+          ],
+          "practice_task": "Write a disk scheduling simulator comparing SSTF and SCAN head movement distances on sample track requests."
+        }
+      ],
+      "resources": [
+        {
+          "type": "Free courses",
+          "name": "Operating Systems: Three Easy Pieces (OSTEP)",
+          "reason": "Renowned free online textbook and course covering Virtualization, Concurrency, and Persistence with clarity.",
+          "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/"
+        },
+        {
+          "type": "YouTube channels",
+          "name": "Neso Academy - Operating Systems",
+          "reason": "Comprehensive university-level video lecture series breaking down every syllabus topic step-by-step.",
+          "url": "https://www.youtube.com/@nesoacademy"
+        },
+        {
+          "type": "Books",
+          "name": "Operating System Concepts (Silberschatz, Galvin, Gagne - Dinosaur Book)",
+          "reason": "The quintessential university textbook for core theory, design principles, and case studies.",
+          "url": "https://www.os-book.com/"
+        },
+        {
+          "type": "Documentation",
+          "name": "GeeksforGeeks Operating Systems Archive",
+          "reason": "Concise revision articles, numerical problem walkthroughs, and viva interview questions.",
+          "url": "https://www.geeksforgeeks.org/operating-systems/"
+        },
+        {
+          "type": "Free courses",
+          "name": "MIT OpenCourseWare 6.828 - Operating System Engineering",
+          "reason": "Hands-on advanced lab course building an actual UNIX-like operating system kernel (xv6).",
+          "url": "https://ocw.mit.edu/"
+        }
+      ],
+      "summary": {
+        "definition": "An Operating System is intermediary software bridging user applications and raw hardware, providing virtualization of CPU and memory, concurrency management, and persistent storage abstractions.",
+        "key_concepts": [
+          "Dual-Mode Execution: Enforcing hardware safety by segregating unprivileged User Mode from privileged Kernel Mode.",
+          "Virtual Memory: Providing each process an isolated, uniform address space larger than physical RAM via paging and TLB translation.",
+          "Concurrency & Synchronization: Coordinating shared access to memory to avoid race conditions using mutexes and semaphores.",
+          "Scheduling & Preemption: Multiplexing CPU time across competing processes to maximize throughput and minimize latency."
+        ],
+        "real_world_uses": [
+          "Desktop and mobile operating systems (Linux, macOS, Windows, Android, iOS)",
+          "Cloud virtualization and hypervisors (KVM, VMware ESXi)",
+          "Embedded real-time operating systems (RTOS) in automotive and medical devices",
+          "High-performance computing cluster scheduling (Slurm)"
+        ],
+        "common_mistakes": [
+          "Confusing processes (independent address spaces) with threads (shared address space within a process).",
+          "Failing to protect shared resources leading to unpredictable race conditions and data corruption.",
+          "Misunderstanding page faults as system errors rather than routine memory paging mechanisms.",
+          "Creating circular wait conditions without acquisition ordering, triggering permanent deadlocks."
+        ]
+      }
+    },
+    "dbms": {
+      "canonical_name": "DBMS",
+      "aliases": ["dbms", "database", "databases", "sql", "relational database"],
+      "description": "Database Management Systems store, retrieve, manage, and manipulate structured and semi-structured data securely and efficiently.",
+      "roadmap": [
+        {
+          "stage_number": 1,
+          "level": "Beginner",
+          "title": "Data Models, Architecture & Relational Concepts",
+          "time_estimate": "1–2 weeks",
+          "subtopics": [
+            "Database vs File System: Redundancy, consistency, and data independence",
+            "Three-Schema Architecture: Physical, conceptual, and external levels",
+            "Relational Model: Relations, tuples, attributes, domains, and keys (Primary, Foreign, Candidate, Super)",
+            "Entity-Relationship (ER) modeling, cardinalities, and converting ER diagrams to tables"
+          ],
+          "practice_task": "Design an ER Diagram for a University Enrollment system and convert it into relational tables with integrity constraints."
+        },
+        {
+          "stage_number": 2,
+          "level": "Beginner",
+          "title": "SQL Querying & Data Manipulation",
+          "time_estimate": "2 weeks",
+          "subtopics": [
+            "DDL (CREATE, ALTER, DROP, TRUNCATE) and DML (SELECT, INSERT, UPDATE, DELETE)",
+            "Filtering and sorting: WHERE, ORDER BY, DISTINCT, LIKE, BETWEEN, IN",
+            "Aggregate functions: COUNT, SUM, AVG, MIN, MAX with GROUP BY and HAVING",
+            "Table Joins: INNER JOIN, LEFT/RIGHT/FULL OUTER JOIN, SELF JOIN, CROSS JOIN"
+          ],
+          "practice_task": "Set up a SQLite/PostgreSQL database and write multi-table JOIN queries with aggregate calculations."
+        },
+        {
+          "stage_number": 3,
+          "level": "Intermediate",
+          "title": "Advanced SQL & Database Design (Normalization)",
+          "time_estimate": "2 weeks",
+          "subtopics": [
+            "Subqueries (scalar, correlated, CTE with WITH clause) and Window Functions (ROW_NUMBER, RANK)",
+            "Functional Dependencies and Armstrong's Axioms",
+            "Normalization forms: 1NF, 2NF, 3NF, and Boyce-Codd Normal Form (BCNF)",
+            "Lossless join decomposition and dependency preservation"
+          ],
+          "practice_task": "Normalize an unnormalized raw invoice table into BCNF and write window functions to calculate running sales totals."
+        },
+        {
+          "stage_number": 4,
+          "level": "Intermediate",
+          "title": "Transactions & Concurrency Control",
+          "time_estimate": "2–3 weeks",
+          "subtopics": [
+            "ACID properties: Atomicity, Consistency, Isolation, Durability",
+            "Transaction states and serializability: Conflict serializability and precedence graphs",
+            "Concurrency anomalies: Dirty read, Non-repeatable read, Phantom read",
+            "Locking protocols: Two-Phase Locking (2PL), Strict 2PL, and Deadlock handling in DBMS"
+          ],
+          "practice_task": "Simulate concurrent banking balance transfers with isolation levels to demonstrate and prevent dirty read anomalies."
+        },
+        {
+          "stage_number": 5,
+          "level": "Advanced",
+          "title": "Storage, Indexing & Query Optimization",
+          "time_estimate": "2–3 weeks",
+          "subtopics": [
+            "File organization: Heap, sequential, and hash files",
+            "Indexing structures: Primary index, Secondary index, Clustered vs Non-clustered",
+            "B-Trees and B+ Trees: Search, insertion, and deletion algorithms",
+            "Query processing pipeline, cost-based optimization, and EXPLAIN ANALYZE"
+          ],
+          "practice_task": "Benchmark SQL query performance before and after creating B-Tree composite indices on a million-row table."
+        },
+        {
+          "stage_number": 6,
+          "level": "Advanced",
+          "title": "NoSQL, Distributed Databases & Modern Storage",
+          "time_estimate": "2 weeks",
+          "subtopics": [
+            "CAP Theorem (Consistency, Availability, Partition tolerance) and PACELC",
+            "NoSQL paradigms: Document (MongoDB), Key-Value (Redis), Column-family (Cassandra), Graph (Neo4j)",
+            "Sharding, replication, and distributed consensus overview",
+            "Database connection pooling and ORMs"
+          ],
+          "practice_task": "Build a hybrid caching service using Redis for hot data lookups backed by PostgreSQL for persistent storage."
+        }
+      ],
+      "resources": [
+        {
+          "type": "Documentation",
+          "name": "PostgreSQL Official Documentation",
+          "reason": "Exemplary documentation for the most feature-rich open-source relational database engine.",
+          "url": "https://www.postgresql.org/docs/"
+        },
+        {
+          "type": "Practice websites",
+          "name": "SQLBolt",
+          "reason": "Free, interactive in-browser exercises to learn and master SQL queries quickly with immediate feedback.",
+          "url": "https://sqlbolt.com/"
+        },
+        {
+          "type": "YouTube channels",
+          "name": "Hussein Nasser (Database Engineering)",
+          "reason": "Exceptional deep dives into database internals, B-Trees, connection pooling, ACID, and storage engines.",
+          "url": "https://www.youtube.com/@hnasr"
+        },
+        {
+          "type": "Books",
+          "name": "Database System Concepts (Silberschatz, Korth, Sudarshan)",
+          "reason": "The standard foundational textbook for database theory, relational calculus, and query processing.",
+          "url": "https://www.db-book.com/"
+        },
+        {
+          "type": "Free courses",
+          "name": "Carnegie Mellon University 15-445/645 - Database Systems (Andy Pavlo)",
+          "reason": "World-class university lecture series on how to build database storage engines from scratch.",
+          "url": "https://15445.courses.cs.cmu.edu/"
+        }
+      ],
+      "summary": {
+        "definition": "A Database Management System (DBMS) is software that enables structured definition, creation, querying, and administration of persistent data with transactional reliability and access controls.",
+        "key_concepts": [
+          "Relational Model: Data organized in tables (relations) governed by schema integrity and foreign key constraints.",
+          "ACID Guarantees: Ensuring atomicity, consistency, isolation, and durability during concurrent transactions.",
+          "Normalization: Systematic reduction of data redundancy and prevention of insertion, deletion, and update anomalies.",
+          "Indexing (B+ Trees): Balanced hierarchical structures providing fast O(log n) range and equality lookups without full table scans."
+        ],
+        "real_world_uses": [
+          "Financial ledger and payment systems requiring absolute transactional consistency",
+          "E-commerce inventory and customer order tracking",
+          "Healthcare patient electronic records management",
+          "Content management systems and enterprise resource planning (ERP)"
+        ],
+        "common_mistakes": [
+          "Selecting WHERE filters on unindexed columns, forcing full table scans on large datasets.",
+          "The N+1 query problem when fetching relational entities in application ORM code.",
+          "Neglecting foreign key constraints, leading to orphaned records and compromised relational integrity.",
+          "Over-normalizing simple schemas leading to excessive, performance-degrading multi-table joins."
+        ]
+      }
+    },
+    "web_development": {
+      "canonical_name": "Web Development",
+      "aliases": ["web development", "web dev", "frontend", "backend", "full stack", "fullstack"],
+      "description": "The practice of designing, building, and maintaining client-side and server-side applications accessible via the World Wide Web.",
+      "roadmap": [
+        {
+          "stage_number": 1,
+          "level": "Beginner",
+          "title": "Web Foundations: HTML5 & Semantic Markup",
+          "time_estimate": "1 week",
+          "subtopics": [
+            "How the web works: DNS, HTTP/HTTPS, client-server model, browser rendering",
+            "HTML5 semantic tags (header, nav, main, article, section, footer)",
+            "Forms, input validation, tables, and media embedding",
+            "Web accessibility (a11y) basics and ARIA landmarks"
+          ],
+          "practice_task": "Build an accessible, semantic portfolio landing page with a validated contact form."
+        },
+        {
+          "stage_number": 2,
+          "level": "Beginner",
+          "title": "Styling & Responsive Layouts: CSS3",
+          "time_estimate": "2 weeks",
+          "subtopics": [
+            "CSS Box Model: Margin, border, padding, and content",
+            "Flexbox for one-dimensional layouts (justify-content, align-items, flex-direction)",
+            "CSS Grid for two-dimensional responsive layouts (grid-template-columns, gap)",
+            "Media queries, mobile-first design, and CSS variables (custom properties)"
+          ],
+          "practice_task": "Build a responsive product gallery that reorganizes layout seamlessly across mobile, tablet, and desktop viewports."
+        },
+        {
+          "stage_number": 3,
+          "level": "Intermediate",
+          "title": "Interactive Client-Side JavaScript",
+          "time_estimate": "2–3 weeks",
+          "subtopics": [
+            "JavaScript syntax, DOM manipulation, and event bubbling/delegation",
+            "Asynchronous JavaScript: Event loop, Callbacks, Promises, and async/await",
+            "Fetching REST APIs with the Fetch API and parsing JSON",
+            "Browser storage: localStorage, sessionStorage, and cookies"
+          ],
+          "practice_task": "Build an interactive Weather Dashboard fetching real-time data from an open weather API with saved favorites in localStorage."
+        },
+        {
+          "stage_number": 4,
+          "level": "Intermediate",
+          "title": "Frontend Frameworks (React / Modern UI)",
+          "time_estimate": "3 weeks",
+          "subtopics": [
+            "Component-based architecture and JSX syntax",
+            "State management with React Hooks (useState, useEffect, useRef, useContext)",
+            "Client-side routing (React Router) and component lifecycle",
+            "Styling solutions: Tailwind CSS or CSS Modules"
+          ],
+          "practice_task": "Build an interactive Task/Kanban Board with drag-and-drop state, filtering, and local persistence."
+        },
+        {
+          "stage_number": 5,
+          "level": "Advanced",
+          "title": "Backend Development, APIs & Authentication",
+          "time_estimate": "3 weeks",
+          "subtopics": [
+            "Server runtime environment (Node.js/Express or Python/FastAPI)",
+            "RESTful API design principles and HTTP status codes",
+            "Authentication & authorization: Password hashing (bcrypt) and JWT (JSON Web Tokens)",
+            "Connecting to databases (PostgreSQL or MongoDB) with connection pooling"
+          ],
+          "practice_task": "Create a secure Authentication and Blogging API with user registration, login, JWT protection, and CRUD post endpoints."
+        },
+        {
+          "stage_number": 6,
+          "level": "Advanced",
+          "title": "Full-Stack Integration, Testing & Deployment",
+          "time_estimate": "2–3 weeks",
+          "subtopics": [
+            "CORS handling, environment configuration, and security headers (Helmet)",
+            "Frontend and backend automated testing (Jest, Pytest, Playwright)",
+            "CI/CD pipelines with GitHub Actions",
+            "Cloud deployment: Vercel/Netlify for frontend, Render/Railway/Docker for backend"
+          ],
+          "practice_task": "Deploy a complete full-stack web application with automated CI/CD checks and live cloud hosting."
+        }
+      ],
+      "resources": [
+        {
+          "type": "Documentation",
+          "name": "MDN Web Docs (Mozilla Developer Network)",
+          "reason": "The industry standard, authoritative reference for HTML, CSS, JavaScript, and Web APIs.",
+          "url": "https://developer.mozilla.org/"
+        },
+        {
+          "type": "Free courses",
+          "name": "freeCodeCamp Responsive Web Design & JavaScript",
+          "reason": "Fully interactive, project-based curriculum earning free verified certifications.",
+          "url": "https://www.freecodecamp.org/"
+        },
+        {
+          "type": "Free courses",
+          "name": "The Odin Project",
+          "reason": "Comprehensive, open-source full-stack curriculum designed to take complete beginners to job-ready developers.",
+          "url": "https://www.theodinproject.com/"
+        },
+        {
+          "type": "YouTube channels",
+          "name": "Traversy Media",
+          "reason": "Practical, hands-on crash courses on web technologies, frameworks, and full-stack projects.",
+          "url": "https://www.youtube.com/@TraversyMedia"
+        },
+        {
+          "type": "Practice websites",
+          "name": "Frontend Mentor",
+          "reason": "Real-world UI challenges with Figma designs and style guides to sharpen frontend implementation skills.",
+          "url": "https://www.frontendmentor.io/"
+        }
+      ],
+      "summary": {
+        "definition": "Web Development encompasses building interactive applications distributed over HTTP/HTTPS, combining client-side user interfaces with server-side business logic and persistent data storage.",
+        "key_concepts": [
+          "Client-Server Architecture: Separation of presentation (browser client) from business logic and database persistence (server).",
+          "Responsive Design: Fluid grid layouts and media queries ensuring seamless usability across diverse viewport form factors.",
+          "Asynchronous Execution: Non-blocking event-driven I/O enabling smooth user interaction while fetching data over networks.",
+          "Stateless HTTP & Authentication: Maintaining session state securely over stateless protocols using tokens (JWT) or secure session cookies."
+        ],
+        "real_world_uses": [
+          "SaaS productivity suites (Google Workspace, Notion, Trello)",
+          "E-commerce storefronts and global marketplace platforms",
+          "Social networking, streaming media, and content distribution platforms",
+          "Enterprise internal dashboards and CRM tools"
+        ],
+        "common_mistakes": [
+          "Neglecting mobile responsiveness by hardcoding fixed pixel widths.",
+          "Exposing sensitive environment variables and API keys in client-side code.",
+          "Failing to sanitize user inputs, exposing apps to Cross-Site Scripting (XSS) and SQL Injection.",
+          "Over-fetching or unoptimized bundle sizes degrading mobile user experience and Core Web Vitals."
+        ]
+      }
+    }
+  }
+}
