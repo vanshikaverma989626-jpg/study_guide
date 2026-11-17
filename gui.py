@@ -1,14 +1,3 @@
-"""
-gui.py
-======
-Native Desktop GUI (Tkinter) for the Study Guide Virtual Assistant.
-Runs 100% offline with zero dependencies and no browser/port setup required.
-Includes LLM integration (Google Gemini) for AI Tutor doubt solving.
-
-Usage:
-    python gui.py
-"""
-
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 import os

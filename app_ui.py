@@ -58,17 +58,37 @@ for topic in assistant.list_available_topics():
 st.title("Study Guide & Revision Assistant")
 st.caption("AI Lab Mini Project — Automated curriculum roadmaps, curated resources, and notes summarization.")
 
-# Navigation Tabs (Clean student-style naming without emoji spam)
-tab_roadmap, tab_resources, tab_summary, tab_notes, tab_full, tab_qa = st.tabs([
-    "Learning Roadmap",
+# Navigation Tabs: Swapped so Learning Resources is first, then Learning Roadmap
+tab_resources, tab_roadmap, tab_summary, tab_notes, tab_full, tab_qa = st.tabs([
     "Learning Resources",
+    "Learning Roadmap",
     "Topic Overview",
     "Notes Summarizer",
     "Complete Study Guide",
     "AI Doubt Solver (Q&A)"
 ])
 
-# ----------------- Tab 1: Learning Roadmap -----------------
+# ----------------- Tab 1: Learning Resources (Swapped to First) -----------------
+with tab_resources:
+    st.subheader("Curated Study Resources")
+    st.write("Finds verified textbooks, video lectures, practice sites, and official documentation.")
+    
+    res_topic = st.text_input("Enter subject or topic name:", value="Data Structures & Algorithms", key="res_topic")
+
+    if st.button("Fetch Resources", type="primary", key="btn_res"):
+        with st.spinner("Fetching resources..."):
+            res = assistant.get_resources(res_topic)
+            md = assistant.format_resources_markdown(res)
+            st.markdown(md)
+            if res.get("success"):
+                st.download_button(
+                    "Download Resources (.md)",
+                    data=md,
+                    file_name=f"{res_topic}_resources.md",
+                    mime="text/markdown"
+                )
+
+# ----------------- Tab 2: Learning Roadmap (Swapped to Second) -----------------
 with tab_roadmap:
     st.subheader("Step-by-Step Learning Path")
     st.write("Generates a progressive learning roadmap from foundational concepts up to advanced topics.")
@@ -89,26 +109,6 @@ with tab_roadmap:
                     "Download Roadmap (.md)",
                     data=md,
                     file_name=f"{topic_input}_{level_input.lower()}_roadmap.md",
-                    mime="text/markdown"
-                )
-
-# ----------------- Tab 2: Learning Resources -----------------
-with tab_resources:
-    st.subheader("Curated Study Resources")
-    st.write("Finds verified textbooks, video lectures, practice sites, and official documentation.")
-    
-    res_topic = st.text_input("Enter subject or topic name:", value="Data Structures & Algorithms", key="res_topic")
-
-    if st.button("Fetch Resources", type="primary", key="btn_res"):
-        with st.spinner("Fetching resources..."):
-            res = assistant.get_resources(res_topic)
-            md = assistant.format_resources_markdown(res)
-            st.markdown(md)
-            if res.get("success"):
-                st.download_button(
-                    "Download Resources (.md)",
-                    data=md,
-                    file_name=f"{res_topic}_resources.md",
                     mime="text/markdown"
                 )
 

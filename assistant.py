@@ -1,18 +1,3 @@
-"""
-assistant.py
-============
-Core Study Guide Virtual Assistant logic.
-
-Coordinates:
-- Knowledge base loading (data/topics.json)
-- Topic fuzzy matching using difflib
-- Hybrid execution: Offline Knowledge Base + Optional Gemini AI Client
-- Roadmap generation and level-based filtering (Beginner, Intermediate, Advanced)
-- Resource curation grouped by type with verified links
-- Topic summaries and notes summarization (via summarizer.py)
-- Markdown formatting and file saving to outputs/
-"""
-
 import difflib
 import json
 import os
@@ -24,30 +9,17 @@ import summarizer
 
 
 class StudyGuideAssistant:
-    """
-    Virtual Assistant for generating learning roadmaps, curated resources,
-    and structured summaries.
-    """
-
     def __init__(self, data_path: Optional[str] = None):
-        """
-        Initializes the assistant and loads the offline knowledge base.
-        """
         if data_path is None:
             base_dir = os.path.dirname(os.path.abspath(__file__))
             data_path = os.path.join(base_dir, "data", "topics.json")
-
         self.data_path = data_path
         self.knowledge_base = self._load_knowledge_base()
 
     def _load_knowledge_base(self) -> Dict[str, Any]:
-        """
-        Loads topics from the JSON knowledge base file.
-        """
         if not os.path.exists(self.data_path):
             print(f"[Warning] Knowledge base file not found at: {self.data_path}")
             return {"topics": {}}
-
         try:
             with open(self.data_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -57,23 +29,11 @@ class StudyGuideAssistant:
             return {"topics": {}}
 
     def list_available_topics(self) -> List[str]:
-        """
-        Returns a sorted list of canonical topic names in the offline knowledge base.
-        """
         return [info["canonical_name"] for info in self.knowledge_base.values()]
 
     def find_topic(self, query: str) -> Tuple[Optional[str], Optional[Dict[str, Any]], List[str]]:
-        """
-        Resolves a user topic query against the knowledge base.
-
-        Returns:
-            (topic_key, topic_data, suggestions)
-            - If exact/alias match found: returns (key, data, [])
-            - If not found: returns (None, None, [closest suggestions via difflib])
-        """
         if not query or not query.strip():
             return None, None, []
-
         q_clean = query.strip().lower()
 
         # 1. Direct key match
@@ -121,21 +81,7 @@ class StudyGuideAssistant:
 
         return None, None, suggested_canonicals
 
-    # =========================================================================
-    # 1. ROADMAP FEATURE
-    # =========================================================================
-
     def get_roadmap(self, topic_query: str, level: str = "beginner") -> Dict[str, Any]:
-        """
-        Generates or retrieves a learning roadmap filtered by user proficiency level.
-
-        Args:
-            topic_query: Topic name (e.g. "Machine Learning", "Python")
-            level: "beginner", "intermediate", or "advanced"
-
-        Returns:
-            Dict containing topic name, mode (offline/AI), filtered stages, and summary.
-        """
         level = level.lower().strip()
         if level not in {"beginner", "intermediate", "advanced"}:
             level = "beginner"
@@ -169,24 +115,23 @@ class StudyGuideAssistant:
                 "available_topics": self.list_available_topics()
             }
 
-        # Filter stages according to the requested proficiency level:
-        # - Beginner: Shows the complete roadmap from foundations to advanced (all stages)
-        # - Intermediate: Skips elementary basics (stages 1-2) to start at intermediate principles
-        # - Advanced: Focuses directly on advanced specialized concepts and capstone projects
         if level == "intermediate":
-            filtered_stages = [s for s in raw_stages if s.get("level", "").lower() in {"intermediate", "advanced"}]
+            filtered_stages = [s for s in raw_stages if str(s.get("level", "")).lower() in {"intermediate", "advanced"}]
             # Fallback if no specific tags
             if not filtered_stages:
                 filtered_stages = raw_stages[2:] if len(raw_stages) > 2 else raw_stages
             level_note = "Intermediate Level: Foundations skipped; focusing on core architecture, design patterns, and advanced concepts."
         elif level == "advanced":
-            filtered_stages = [s for s in raw_stages if s.get("level", "").lower() == "advanced"]
+            filtered_stages = [s for s in raw_stages if str(s.get("level", "")).lower() == "advanced"]
             if not filtered_stages:
                 filtered_stages = raw_stages[-2:] if len(raw_stages) >= 2 else raw_stages
             level_note = "Advanced Level: Focusing exclusively on production-grade systems, concurrency, optimization, and capstone deployment."
         else:
             filtered_stages = raw_stages
             level_note = "Beginner Level: Complete end-to-end learning path from initial setup to advanced mastery."
+
+        if not filtered_stages:
+            filtered_stages = raw_stages
 
         return {
             "success": True,
@@ -199,9 +144,6 @@ class StudyGuideAssistant:
         }
 
     def format_roadmap_markdown(self, roadmap_result: Dict[str, Any]) -> str:
-        """
-        Formats roadmap dictionary into clean, presentation-ready Markdown.
-        """
         if not roadmap_result.get("success"):
             return self._format_not_found(roadmap_result)
 
@@ -215,38 +157,36 @@ class StudyGuideAssistant:
             ""
         ]
 
-        for s in roadmap_result["stages"]:
-            st_num = s.get("stage_number", "")
-            st_lvl = s.get("level", "")
-            title = s.get("title", "")
-            time_est = s.get("time_estimate", "")
-            subtopics = s.get("subtopics", [])
-            task = s.get("practice_task", "")
+        for idx, s in enumerate(roadmap_result["stages"], 1):
+            st_num = s.get("stage_number", s.get("stage", idx))
+            st_lvl = s.get("level", s.get("difficulty", "Core"))
+            title = s.get("title", s.get("name", s.get("stage_title", f"Stage {idx}")))
+            time_est = s.get("time_estimate", s.get("duration", s.get("time", "1–2 weeks")))
+            subtopics = s.get("subtopics", s.get("topics", s.get("concepts", [])))
+            task = s.get("practice_task", s.get("project", s.get("task", "")))
 
             lines.append(f"### Stage {st_num}: {title} [{st_lvl}]")
             lines.append(f"- **Estimated Time:** {time_est}")
             lines.append("- **Core Subtopics:**")
-            for sub in subtopics:
-                if isinstance(sub, dict):
-                    sname = sub.get("name", sub.get("title", "Topic"))
-                    sdesc = sub.get("description", "")
-                    lines.append(f"  - **{sname}**: {sdesc}" if sdesc else f"  - **{sname}**")
-                else:
-                    lines.append(f"  - {sub}")
+            if isinstance(subtopics, list):
+                for sub in subtopics:
+                    if isinstance(sub, dict):
+                        sname = sub.get("name", sub.get("title", "Topic"))
+                        sdesc = sub.get("description", "")
+                        lines.append(f"  - **{sname}**: {sdesc}" if sdesc else f"  - **{sname}**")
+                    else:
+                        lines.append(f"  - {sub}")
+            elif isinstance(subtopics, str):
+                lines.append(f"  - {subtopics}")
+
             if task:
                 lines.append(f"- **Hands-on Practice Task:** {task}")
             lines.append("")
 
         return "\n".join(lines)
 
-    # =========================================================================
-    # 2. RESOURCES FEATURE
-    # =========================================================================
 
     def get_resources(self, topic_query: str) -> Dict[str, Any]:
-        """
-        Retrieves 4-6 curated learning resources grouped by type.
-        """
         key, data, suggestions = self.find_topic(topic_query)
         resources_list = []
         canonical_name = topic_query.strip().title()
@@ -288,9 +228,6 @@ class StudyGuideAssistant:
         }
 
     def format_resources_markdown(self, resources_result: Dict[str, Any]) -> str:
-        """
-        Formats resources dictionary into clean Markdown grouped by type.
-        """
         if not resources_result.get("success"):
             return self._format_not_found(resources_result)
 
@@ -320,15 +257,7 @@ class StudyGuideAssistant:
 
         return "\n".join(lines)
 
-    # =========================================================================
-    # 3. SUMMARY FEATURE (Topic Overview & Notes Extractive Summarizer)
-    # =========================================================================
-
     def summarize_topic(self, topic_query: str, length: str = "medium") -> Dict[str, Any]:
-        """
-        Generates a concise conceptual overview of a topic:
-        Definition, Key Concepts, Real-World Uses, and Common Mistakes.
-        """
         length = length.lower().strip()
         if length not in {"short", "medium", "detailed"}:
             length = "medium"
@@ -388,9 +317,6 @@ class StudyGuideAssistant:
         }
 
     def format_topic_summary_markdown(self, summary_result: Dict[str, Any]) -> str:
-        """
-        Formats topic overview into structured Markdown.
-        """
         if not summary_result.get("success"):
             return self._format_not_found(summary_result)
 
@@ -442,12 +368,6 @@ class StudyGuideAssistant:
         return "\n".join(lines)
 
     def summarize_user_notes(self, text_or_filepath: str, length: str = "medium", source_name: Optional[str] = None, use_ai: bool = False) -> Dict[str, Any]:
-        """
-        Summarizes raw notes pasted by the user or loaded from a .txt file.
-        Supports both:
-          - Offline Extractive word-frequency scoring (default)
-          - Generative LLM Summarization (if use_ai=True and API key set)
-        """
         source_description = source_name or "Pasted Text"
         text_content = text_or_filepath
 
@@ -489,9 +409,6 @@ class StudyGuideAssistant:
         }
 
     def ask_ai_tutor(self, question: str) -> Dict[str, Any]:
-        """
-        Sends a study question or doubt to the Gemini LLM Tutor.
-        """
         if not ai_client.is_ai_available():
             return {
                 "success": False,
@@ -511,14 +428,7 @@ class StudyGuideAssistant:
             "answer": answer
         }
 
-    # =========================================================================
-    # 4. FULL STUDY GUIDE
-    # =========================================================================
-
     def get_full_study_guide(self, topic: str, level: str = "beginner", length: str = "medium") -> Dict[str, Any]:
-        """
-        Compiles the Roadmap, Resources, and Summary into one comprehensive guide.
-        """
         roadmap_res = self.get_roadmap(topic, level=level)
         resources_res = self.get_resources(topic)
         summary_res = self.summarize_topic(topic, length=length)
@@ -555,14 +465,7 @@ class StudyGuideAssistant:
             "markdown": full_markdown
         }
 
-    # =========================================================================
-    # 5. UTILITIES (Save File, Error Formatting)
-    # =========================================================================
-
     def save_study_guide(self, content: str, topic_name: str, output_dir: Optional[str] = None) -> str:
-        """
-        Saves the generated markdown study guide to outputs/<topic>_study_guide.md.
-        """
         if output_dir is None:
             base_dir = os.path.dirname(os.path.abspath(__file__))
             output_dir = os.path.join(base_dir, "outputs")
@@ -581,9 +484,6 @@ class StudyGuideAssistant:
         return filepath
 
     def _format_not_found(self, result: Dict[str, Any]) -> str:
-        """
-        Helper to construct friendly suggestion text when a topic is missing.
-        """
         topic = result.get("topic", "Unknown")
         suggestions = result.get("suggestions", [])
         available = result.get("available_topics", [])

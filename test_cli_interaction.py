@@ -1,10 +1,3 @@
-"""
-test_cli_interaction.py
-========================
-Simulates real interactive user inputs through main.py to verify
-the entire CLI loop, menus, inputs, and formatting.
-"""
-
 import subprocess
 import sys
 

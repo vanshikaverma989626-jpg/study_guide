@@ -1,13 +1,3 @@
-"""
-test_suite.py
-=============
-Automated test suite verifying all required features:
-1. 3 Topics tested (Roadmap, Resources, Summary)
-2. Note summarizer on sample_notes.txt (Short, Medium, Detailed)
-3. Unknown topic test with fuzzy matching (difflib)
-4. Markdown saving to outputs/
-"""
-
 import os
 import sys
 from assistant import StudyGuideAssistant

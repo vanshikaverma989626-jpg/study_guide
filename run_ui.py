@@ -1,10 +1,3 @@
-"""
-run_ui.py
-=========
-Convenient launcher for the Streamlit Web UI.
-Uses python -m streamlit to bypass Windows PATH limitations.
-"""
-
 import sys
 import subprocess
 import os

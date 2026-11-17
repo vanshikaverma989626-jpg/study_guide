@@ -1,29 +1,8 @@
-"""
-main.py
-=======
-Interactive Command-Line Interface for the Study Guide Virtual Assistant.
-
-Menu:
-  1. Get roadmap
-  2. Get resources
-  3. Summarize a topic
-  4. Summarize my notes (Extractive or AI)
-  5. Full study guide (all three)
-  6. Ask AI Tutor (LLM Doubt Solver)
-  7. Configure Gemini API Key
-  8. Exit
-"""
-
 import os
 import sys
 from assistant import StudyGuideAssistant
 import ai_client
-
-
 def print_banner(assistant: StudyGuideAssistant):
-    """
-    Displays the friendly greeting banner and operating mode status.
-    """
     ai_status = "✨ AI Mode (Google Gemini Active)" if ai_client.is_ai_available() else "🔌 Offline Mode (Built-in Knowledge Base)"
     print("\n" + "=" * 66)
     print("      🤖 STUDY GUIDE VIRTUAL ASSISTANT - AI LAB PROJECT 📚")
@@ -34,9 +13,6 @@ def print_banner(assistant: StudyGuideAssistant):
 
 
 def prompt_level() -> str:
-    """
-    Prompts the user to select their proficiency level with input validation.
-    """
     print("\nSelect your current proficiency level:")
     print("  1. Beginner     (Complete journey from foundations to mastery)")
     print("  2. Intermediate (Jump past basics to architecture & core patterns)")
@@ -48,9 +24,6 @@ def prompt_level() -> str:
 
 
 def prompt_length() -> str:
-    """
-    Prompts the user to select summary length with input validation.
-    """
     print("\nSelect desired summary length:")
     print("  1. Short    (2-3 high-level key takeaways)")
     print("  2. Medium   (Balanced 4-5 key concepts & examples - default)")
@@ -62,9 +35,6 @@ def prompt_length() -> str:
 
 
 def prompt_save_file(assistant: StudyGuideAssistant, content: str, default_name: str):
-    """
-    Asks the user if they want to save the output to outputs/<name>_study_guide.md.
-    """
     save_choice = input("\n💾 Would you like to save this to a file? (y/n, default=n): ").strip().lower()
     if save_choice in {"y", "yes"}:
         try:
@@ -75,9 +45,6 @@ def prompt_save_file(assistant: StudyGuideAssistant, content: str, default_name:
 
 
 def handle_roadmap(assistant: StudyGuideAssistant):
-    """
-    Handler for Option 1: Get roadmap.
-    """
     print("\n--- 🗺️ GET LEARNING ROADMAP ---")
     topic = input("Enter a topic (e.g. Python, Machine Learning, Operating Systems): ").strip()
     if not topic:
@@ -95,9 +62,6 @@ def handle_roadmap(assistant: StudyGuideAssistant):
 
 
 def handle_resources(assistant: StudyGuideAssistant):
-    """
-    Handler for Option 2: Get resources.
-    """
     print("\n--- 📚 GET CURATED RESOURCES ---")
     topic = input("Enter a topic (e.g. DBMS, Web Development, DSA): ").strip()
     if not topic:
@@ -114,9 +78,6 @@ def handle_resources(assistant: StudyGuideAssistant):
 
 
 def handle_topic_summary(assistant: StudyGuideAssistant):
-    """
-    Handler for Option 3: Summarize a topic.
-    """
     print("\n--- 📝 SUMMARIZE A TOPIC ---")
     topic = input("Enter a topic to summarize: ").strip()
     if not topic:
@@ -134,9 +95,6 @@ def handle_topic_summary(assistant: StudyGuideAssistant):
 
 
 def handle_notes_summary(assistant: StudyGuideAssistant):
-    """
-    Handler for Option 4: Summarize my notes (Extractive vs Generative LLM).
-    """
     print("\n--- 📋 SUMMARIZE MY NOTES ---")
     print("Choose note input method:")
     print("  1. Paste text directly")
@@ -213,9 +171,6 @@ def handle_notes_summary(assistant: StudyGuideAssistant):
 
 
 def handle_full_guide(assistant: StudyGuideAssistant):
-    """
-    Handler for Option 5: Full study guide (Roadmap + Resources + Summary).
-    """
     print("\n--- 🎓 GENERATE FULL STUDY GUIDE (ALL THREE) ---")
     topic = input("Enter a topic (e.g. Machine Learning, Python, DBMS): ").strip()
     if not topic:
@@ -235,9 +190,6 @@ def handle_full_guide(assistant: StudyGuideAssistant):
 
 
 def handle_ai_tutor(assistant: StudyGuideAssistant):
-    """
-    Handler for Option 6: Ask AI Tutor (LLM Doubt Solver).
-    """
     print("\n--- 🤖 ASK AI TUTOR (LLM DOUBT SOLVER) ---")
     if not ai_client.is_ai_available():
         print("⚠️ Gemini AI Key is currently not set.")
@@ -268,9 +220,6 @@ def handle_ai_tutor(assistant: StudyGuideAssistant):
 
 
 def handle_set_api_key(assistant: StudyGuideAssistant):
-    """
-    Handler for Option 7: Configure Gemini API Key.
-    """
     print("\n--- 🔑 CONFIGURE GOOGLE GEMINI API KEY ---")
     current_key = ai_client.get_api_key()
     if current_key:
@@ -295,9 +244,6 @@ def handle_set_api_key(assistant: StudyGuideAssistant):
 
 
 def main():
-    """
-    Main loop running the interactive CLI menu.
-    """
     assistant = StudyGuideAssistant()
     print_banner(assistant)
 
@@ -305,22 +251,22 @@ def main():
         print("\n" + "-" * 40)
         print("               MAIN MENU")
         print("-" * 40)
-        print("  1. Get roadmap")
-        print("  2. Get resources")
+        print("  1. Get resources")
+        print("  2. Get roadmap")
         print("  3. Summarize a topic")
         print("  4. Summarize my notes")
         print("  5. Full study guide (all three)")
-        print("  6. 🤖 Ask AI Tutor (LLM Doubt Solver)")
-        print("  7. 🔑 Configure Gemini API Key")
-        print("  8. 🚪 Exit")
+        print("  6. Ask AI Tutor (LLM Doubt Solver)")
+        print("  7. Configure Gemini API Key")
+        print("  8. Exit")
         print("-" * 40)
 
         choice = input("Enter your choice (1-8): ").strip()
 
         if choice == "1":
-            handle_roadmap(assistant)
-        elif choice == "2":
             handle_resources(assistant)
+        elif choice == "2":
+            handle_roadmap(assistant)
         elif choice == "3":
             handle_topic_summary(assistant)
         elif choice == "4":

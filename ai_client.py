@@ -6,25 +6,11 @@ Student-Friendly Google Gemini LLM Integration for Study Guide Assistant.
 What is an LLM (Large Language Model)?
 ---------------------------------------
 An LLM is a machine learning model trained on billions of sentences to understand
-and generate human-like text. In this project, we use Google Gemini (gemini-1.5-flash)
+and generate human-like text. In this project, we use Google Gemini
 as an intelligent tutor that can:
   1. Generate study guides for ANY topic (even outside our offline database).
   2. Answer student study questions and explain tough concepts with analogies.
   3. Provide generative (abstractive) summaries of lecture notes.
-
-How the Integration Works (Step-by-Step for Viva):
---------------------------------------------------
-1. API Key Check:
-   Looks for a key in: runtime memory, GEMINI_API_KEY env variable, or api_key.txt.
-2. Prompt Engineering:
-   We craft structured instructions (prompts) telling the LLM what to do and
-   how to format its output (e.g. structured JSON or markdown bullets).
-3. API Call:
-   We send the prompt over HTTPS to Google's Gemini endpoint using Python's
-   built-in urllib (or google-generativeai SDK if installed).
-4. Graceful Fallback:
-   If there is no internet, no API key, or an API error, the program never crashes!
-   It simply falls back to the offline knowledge base with a friendly notice.
 """
 
 import json
@@ -37,20 +23,18 @@ from typing import Optional, Dict, Any, List
 # In-memory API key storage for current session
 _RUNTIME_API_KEY: Optional[str] = None
 
-# Active candidate models in order of priority (handles deprecation & capacity spikes)
+# Active candidate models in order of priority (handles deprecation, quota & capacity spikes)
 CANDIDATE_MODELS = [
-    "gemini-flash-latest",
     "gemini-flash-lite-latest",
-    "gemini-3.8-flash",
-    "gemini-2.5-flash-lite"
+    "gemini-3.5-flash-lite",
+    "gemini-3.1-flash-lite",
+    "gemma-4-26b-a4b-it",
+    "gemini-flash-latest",
+    "gemini-3.8-flash"
 ]
 
 
 def set_api_key(key: str, save_to_file: bool = True) -> bool:
-    """
-    Sets the Gemini API key for the current session.
-    Optionally saves it to api_key.txt in the project folder so it persists.
-    """
     global _RUNTIME_API_KEY
     clean_key = key.strip()
     if not clean_key:
@@ -71,14 +55,6 @@ def set_api_key(key: str, save_to_file: bool = True) -> bool:
 
 
 def get_api_key() -> Optional[str]:
-    """
-    Retrieves the Gemini API key.
-    Priority order:
-      1. In-memory session key (_RUNTIME_API_KEY)
-      2. Environment variable (GEMINI_API_KEY)
-      3. api_key.txt file in project directory
-      4. .env file
-    """
     global _RUNTIME_API_KEY
     if _RUNTIME_API_KEY:
         return _RUNTIME_API_KEY
@@ -110,9 +86,6 @@ def get_api_key() -> Optional[str]:
 
 
 def is_ai_available() -> bool:
-    """
-    Returns True if an API key is configured and AI mode can be used.
-    """
     return get_api_key() is not None
 
 
@@ -162,7 +135,7 @@ def call_gemini_api(prompt: str, temperature: float = 0.3) -> Optional[str]:
                 headers={"Content-Type": "application/json"},
                 method="POST"
             )
-            with urllib.request.urlopen(req, timeout=15) as response:
+            with urllib.request.urlopen(req, timeout=18) as response:
                 result = json.loads(response.read().decode("utf-8"))
                 candidates = result.get("candidates", [])
                 if candidates:
@@ -170,8 +143,8 @@ def call_gemini_api(prompt: str, temperature: float = 0.3) -> Optional[str]:
                     if parts:
                         return parts[0].get("text", "")
         except urllib.error.HTTPError as http_err:
-            # If 404 (model deprecated) or 503 (high demand), gracefully try next candidate model
-            if http_err.code in {404, 503}:
+            # If 404 (model deprecated), 429 (rate/quota exceeded on this model), or 503 (high demand), try next model!
+            if http_err.code in {404, 429, 503}:
                 continue
             elif http_err.code in {400, 403}:
                 print(f"\n[AI Error] Gemini API returned HTTP {http_err.code}. Check that your API key is valid.")
@@ -183,10 +156,10 @@ def call_gemini_api(prompt: str, temperature: float = 0.3) -> Optional[str]:
     return None
 
 
-def extract_json_from_response(raw_text: str) -> Optional[Dict[str, Any]]:
+def extract_json_from_response(raw_text: str) -> Optional[Any]:
     """
-    Helper to extract and parse JSON from the LLM's response,
-    safely handling markdown ```json code blocks.
+    Helper to extract and parse JSON from the LLM's response.
+    Handles JSON objects {...} and JSON arrays [...] gracefully.
     """
     if not raw_text:
         return None
@@ -195,17 +168,93 @@ def extract_json_from_response(raw_text: str) -> Optional[Dict[str, Any]]:
     match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", cleaned)
     if match:
         cleaned = match.group(1).strip()
-
     try:
         return json.loads(cleaned)
     except json.JSONDecodeError:
-        start = cleaned.find("{")
-        end = cleaned.rfind("}")
-        if start != -1 and end != -1:
+        # Search for first { and last }
+        start_brace = cleaned.find("{")
+        end_brace = cleaned.rfind("}")
+        if start_brace != -1 and end_brace != -1 and end_brace > start_brace:
             try:
-                return json.loads(cleaned[start:end+1])
+                return json.loads(cleaned[start_brace:end_brace+1])
             except Exception:
-                return None
+                pass
+        # Search for first [ and last ]
+        start_bracket = cleaned.find("[")
+        end_bracket = cleaned.rfind("]")
+        if start_bracket != -1 and end_bracket != -1 and end_bracket > start_bracket:
+            try:
+                return json.loads(cleaned[start_bracket:end_bracket+1])
+            except Exception:
+                pass
+    return None
+
+
+def find_stages_list(data: Any) -> Optional[List[Dict[str, Any]]]:
+    """
+    Robustly extracts a list of stage dictionaries anywhere inside data,
+    even if Gemini nests it under {'roadmap': {'stages': [...]}} or similar.
+    """
+    if isinstance(data, list):
+        if data and isinstance(data[0], dict):
+            return data
+        return None
+
+    if isinstance(data, dict):
+        # 1. Check common roadmap keys
+        for key in ["stages", "roadmap", "learning_path", "curriculum", "steps", "modules", "path"]:
+            if key in data:
+                val = data[key]
+                if isinstance(val, list) and val and isinstance(val[0], dict):
+                    return val
+                if isinstance(val, dict):
+                    nested = find_stages_list(val)
+                    if nested:
+                        return nested
+
+        # 2. Search any key that holds a list of dicts with stage-like attributes
+        for k, v in data.items():
+            if isinstance(v, list) and v and isinstance(v[0], dict):
+                first_item = v[0]
+                stage_indicators = {"stage", "stage_number", "title", "name", "level", "topics", "subtopics", "description", "key_activities"}
+                if any(ind in first_item for ind in stage_indicators):
+                    return v
+            elif isinstance(v, dict):
+                nested = find_stages_list(v)
+                if nested:
+                    return nested
+
+    return None
+
+
+def find_resources_list(data: Any) -> Optional[List[Dict[str, Any]]]:
+    """
+    Robustly extracts a list of resource dictionaries anywhere inside data.
+    """
+    if isinstance(data, list):
+        if data and isinstance(data[0], dict):
+            return data
+        return None
+
+    if isinstance(data, dict):
+        for key in ["resources", "learning_resources", "materials", "links", "recommendations"]:
+            if key in data:
+                val = data[key]
+                if isinstance(val, list) and val and isinstance(val[0], dict):
+                    return val
+                if isinstance(val, dict):
+                    nested = find_resources_list(val)
+                    if nested:
+                        return nested
+
+        for k, v in data.items():
+            if isinstance(v, list) and v and isinstance(v[0], dict):
+                return v
+            elif isinstance(v, dict):
+                nested = find_resources_list(v)
+                if nested:
+                    return nested
+
     return None
 
 
@@ -214,10 +263,6 @@ def extract_json_from_response(raw_text: str) -> Optional[Dict[str, Any]]:
 # =============================================================================
 
 def ask_ai_tutor(question: str) -> Optional[str]:
-    """
-    Sends a student question or study doubt to Gemini LLM.
-    Returns a friendly, easy-to-understand explanation with analogies.
-    """
     prompt = f"""You are a friendly, patient computer science tutor helping an undergraduate student.
 Answer this student question clearly, simply, and engagingly.
 
@@ -225,10 +270,10 @@ Student Question:
 "{question}"
 
 Please format your response in clean Markdown with:
-1. 💡 Simple Core Concept (explained in 2-3 plain sentences)
-2. 🚗 Real-World Analogy (to make it intuitive and memorable)
-3. 📝 Concrete Example / Code Snippet (short and beginner friendly)
-4. 🎯 Quick Exam / Viva Tip
+1. Simple Core Concept (explained in 2-3 plain sentences)
+2. Real-World Analogy (to make it intuitive and memorable)
+3. Concrete Example / Code Snippet (short and beginner friendly)
+4. Quick Exam / Viva Tip
 """
     return call_gemini_api(prompt, temperature=0.4)
 
@@ -238,10 +283,6 @@ Please format your response in clean Markdown with:
 # =============================================================================
 
 def generate_notes_summary_ai(notes_text: str, length: str = "medium") -> Optional[str]:
-    """
-    Uses Gemini LLM to create an abstractive/generative summary of notes,
-    rephrasing and highlighting key points in clear markdown bullets.
-    """
     num_points = {"short": "3 concise", "medium": "5 clear", "detailed": "7-8 thorough"}.get(length.lower(), "5 clear")
 
     prompt = f"""You are an expert academic study assistant.
@@ -254,7 +295,7 @@ Student Notes:
 \"\"\"
 
 Output format:
-### 🤖 AI-Generated Summary ({length.capitalize()} Length)
+### Notes Summary ({length.capitalize()} Length)
 - Bullet point 1
 - Bullet point 2
 ...
@@ -267,11 +308,8 @@ Output format:
 # =============================================================================
 
 def generate_roadmap_ai(topic: str) -> Optional[List[Dict[str, Any]]]:
-    """
-    Uses Gemini to generate a structured 6-stage roadmap for an arbitrary topic.
-    """
     prompt = f"""You are an expert curriculum designer.
-Create a structured learning roadmap for the topic: "{topic}".
+Create a structured 6-stage learning roadmap for the topic: "{topic}".
 Output ONLY valid JSON (no markdown formatting outside JSON) matching this exact schema:
 {{
   "stages": [
@@ -292,15 +330,11 @@ Provide 6 ordered stages spanning Beginner (stages 1-2), Intermediate (stages 3-
         return None
 
     data = extract_json_from_response(raw_response)
-    if data and "stages" in data and isinstance(data["stages"], list):
-        return data["stages"]
-    return None
+    stages = find_stages_list(data)
+    return stages
 
 
 def generate_resources_ai(topic: str) -> Optional[List[Dict[str, Any]]]:
-    """
-    Uses Gemini to generate curated learning resources for an arbitrary topic.
-    """
     prompt = f"""You are an educational advisor.
 Provide 5-6 high quality learning resources for the topic: "{topic}".
 Group them across these types: Free courses, YouTube channels, Books, Practice websites, Documentation.
@@ -323,15 +357,10 @@ IMPORTANT: Do not invent URLs. Use only real official sites or leave url empty.
         return None
 
     data = extract_json_from_response(raw_response)
-    if data and "resources" in data and isinstance(data["resources"], list):
-        return data["resources"]
-    return None
+    return find_resources_list(data)
 
 
 def generate_summary_ai(topic: str) -> Optional[Dict[str, Any]]:
-    """
-    Uses Gemini to generate a topic conceptual summary.
-    """
     prompt = f"""You are an academic computer science professor.
 Provide a clear structured summary of the topic: "{topic}".
 

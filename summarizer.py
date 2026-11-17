@@ -1,37 +1,7 @@
-"""
-summarizer.py
-=============
-Offline Extractive Text Summarizer for the Study Guide Assistant.
-
-How it works (Extractive Summarization by Word Frequency):
------------------------------------------------------------
-1. Sentence Tokenization:
-   Split the input text into individual sentences while preserving punctuation.
-2. Word Tokenization & Cleaning:
-   Convert text to lowercase and remove punctuation to isolate individual words.
-3. Stopword Filtering:
-   Filter out common structural words (e.g., 'the', 'is', 'at', 'which') using
-   a built-in stopword set (with optional NLTK fallback if installed).
-4. Word Frequency Distribution:
-   Count how often each content word appears. Words appearing frequently
-   are considered more important / central to the text's theme.
-5. Frequency Normalization:
-   Divide each word count by the maximum frequency so frequencies range between 0 and 1.
-6. Sentence Scoring:
-   Score each sentence by summing the normalized scores of its constituent words,
-   divided by the sentence length to avoid bias toward overly long sentences.
-7. Top Sentence Selection:
-   Pick the top N scoring sentences according to the requested length
-   (short, medium, detailed), maintaining their original appearance order.
-8. Keyword Highlighting:
-   Find the top keywords from the frequency table and bold them in the summary.
-"""
-
 import re
 import string
 from collections import Counter
 from typing import List, Dict, Tuple, Set
-
 
 # Built-in English stopwords so this runs 100% offline without mandatory downloads
 BUILTIN_STOPWORDS: Set[str] = {
@@ -59,10 +29,6 @@ BUILTIN_STOPWORDS: Set[str] = {
 
 
 def get_stopwords() -> Set[str]:
-    """
-    Returns stopwords, preferring NLTK if installed and downloaded,
-    otherwise falling back to built-in stopwords.
-    """
     try:
         import nltk
         from nltk.corpus import stopwords as nltk_stopwords
@@ -73,87 +39,52 @@ def get_stopwords() -> Set[str]:
 
 
 def split_into_sentences(text: str) -> List[str]:
-    """
-    Splits raw text into a list of sentences using regex.
-    Handles standard sentence endings (.!?) while avoiding common abbreviations.
-    """
     if not text or not text.strip():
         return []
-
     # Clean multi-line whitespace
     cleaned_text = re.sub(r"\s+", " ", text).strip()
-    
     # Split on punctuation followed by space and a capital letter or end of string
     # Regex lookbehind handles standard delimiters
     sentence_pattern = r"(?<=[.!?])\s+(?=[A-Z0-9\"'(\[])"
     raw_sentences = re.split(sentence_pattern, cleaned_text)
-    
     # Clean up and filter out empty lines or overly short fragments
     sentences = [s.strip() for s in raw_sentences if len(s.strip()) > 10]
     return sentences if sentences else [cleaned_text]
 
-
 def extract_words(text: str) -> List[str]:
-    """
-    Extracts lowercase alphabetical words from a string.
-    """
     return re.findall(r"\b[a-zA-Z]{2,}\b", text.lower())
 
-
 def compute_word_frequencies(sentences: List[str], stopwords: Set[str]) -> Tuple[Dict[str, float], List[str]]:
-    """
-    Calculates normalized word frequencies across all sentences.
-    Returns:
-        - normalized_freq: Dict mapping word -> float score (0.0 to 1.0)
-        - top_keywords: List of the top 8 most frequent words for highlighting
-    """
     word_counts = Counter()
     for sentence in sentences:
         words = extract_words(sentence)
         for w in words:
             if w not in stopwords:
                 word_counts[w] += 1
-
     if not word_counts:
         return {}, []
-
     max_freq = max(word_counts.values())
     normalized_freq = {word: count / max_freq for word, count in word_counts.items()}
     top_keywords = [word for word, _ in word_counts.most_common(8)]
-    
     return normalized_freq, top_keywords
 
-
 def score_sentence(sentence: str, word_frequencies: Dict[str, float]) -> float:
-    """
-    Scores a single sentence by summing the weights of its informative words.
-    Normalizes by word count^0.7 to avoid over-penalizing short sentences
-    while preventing long run-on sentences from unfairly dominating.
-    """
     words = extract_words(sentence)
     if not words:
         return 0.0
-
     score = 0.0
     informative_word_count = 0
     for w in words:
         if w in word_frequencies:
             score += word_frequencies[w]
             informative_word_count += 1
-
     if informative_word_count == 0:
         return 0.0
-
     # Normalization factor balances sentence length
     length_penalty = (len(words) ** 0.7)
     return score / length_penalty
 
-
 def highlight_keywords(sentence: str, keywords: List[str]) -> str:
-    """
-    Highlights significant keywords in the sentence using Markdown bold (**word**).
-    Matches whole words case-insensitively.
-    """
     highlighted = sentence
     for kw in keywords:
         if len(kw) < 4:  # Avoid over-highlighting very short words
@@ -164,24 +95,7 @@ def highlight_keywords(sentence: str, keywords: List[str]) -> str:
         highlighted = pattern.sub(r"**\1**", highlighted)
     return highlighted
 
-
 def summarize_text(text: str, length: str = "medium") -> Dict[str, any]:
-    """
-    Summarizes given text into bullet points using extractive word-frequency scoring.
-
-    Args:
-        text (str): The raw text or pasted notes to summarize.
-        length (str): "short" (2-3 bullets), "medium" (4-5 bullets), or "detailed" (7-8 bullets).
-
-    Returns:
-        dict: {
-            "summary_bullets": List[str],
-            "key_terms": List[str],
-            "total_sentences": int,
-            "summary_sentences_count": int,
-            "length_mode": str
-        }
-    """
     if not text or not text.strip():
         return {
             "summary_bullets": ["(No text provided to summarize.)"],
@@ -190,7 +104,6 @@ def summarize_text(text: str, length: str = "medium") -> Dict[str, any]:
             "summary_sentences_count": 0,
             "length_mode": length
         }
-
     sentences = split_into_sentences(text)
     if not sentences:
         return {
@@ -200,7 +113,6 @@ def summarize_text(text: str, length: str = "medium") -> Dict[str, any]:
             "summary_sentences_count": 1,
             "length_mode": length
         }
-
     stopwords = get_stopwords()
     word_freq, top_keywords = compute_word_frequencies(sentences, stopwords)
 
@@ -231,7 +143,6 @@ def summarize_text(text: str, length: str = "medium") -> Dict[str, any]:
     for _, sent, _ in in_order:
         highlighted = highlight_keywords(sent, top_keywords)
         bullets.append(highlighted)
-
     return {
         "summary_bullets": bullets,
         "key_terms": top_keywords,
@@ -242,22 +153,16 @@ def summarize_text(text: str, length: str = "medium") -> Dict[str, any]:
 
 
 def format_summary_markdown(summary_result: Dict[str, any], title: str = "Notes Summary") -> str:
-    """
-    Formats the summary result into clean, readable Markdown text.
-    """
     lines = [
         f"### Notes Summary: {title} ({summary_result['length_mode'].capitalize()} Length)",
         f"*Compressed from {summary_result['total_sentences']} sentences down to {summary_result['summary_sentences_count']} key points.*",
         ""
     ]
-
     if summary_result["key_terms"]:
         terms_str = ", ".join([f"`{t}`" for t in summary_result["key_terms"][:6]])
         lines.append(f"**Key Identified Terms:** {terms_str}")
         lines.append("")
-
     lines.append("**Key Takeaways:**")
     for b in summary_result["summary_bullets"]:
         lines.append(f"- {b}")
-
     return "\n".join(lines)
